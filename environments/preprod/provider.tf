@@ -11,7 +11,7 @@ terraform {
     resource_group_name  = "rg-prepod"
     storage_account_name = "sattarstorage1"
     container_name       = "sattarcontainer"
-    key                  = "prepod.terraform.tfstate"
+    key                  = "preprod.terraform.tfstate"
   }
 }
 

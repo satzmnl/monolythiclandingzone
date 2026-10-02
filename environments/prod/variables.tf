@@ -1,2 +1,7 @@
-variable "rgs" {}
-variable "storage_accounts" {}
+variable "rgs" {
+  default = {}
+}
+
+variable "storage_accounts" {
+  default = {}
+}

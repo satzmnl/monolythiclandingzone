@@ -1,0 +1,88 @@
+name: "Terraform CI/CD"
+
+on:
+  push:
+    branches:
+      - main
+      - feature
+    paths:
+      - 'environments/**'
+      - 'modules/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'environments/**'
+      - 'modules/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to run Terraform against'
+        required: true
+        type: choice
+        options:
+          - preprod
+          - prod
+        default: 'preprod'
+      action:
+        description: 'Terraform action to perform'
+        required: true
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
+        default: 'plan'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  terraform:
+    name: "Terraform (${{ inputs.environment || 'preprod' }})"
+    runs-on: ubuntu-latest
+    env:
+      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      TF_WORKING_DIR: "environments/${{ inputs.environment || 'preprod' }}"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "latest"
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Plan
+        if: github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'plan') || (github.event_name == 'push')
+        run: terraform plan -no-color -out=tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Apply
+        if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'apply')
+        run: terraform apply -auto-approve tfplan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+
+      - name: Terraform Destroy
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'destroy'
+        run: terraform destroy -auto-approve
+        working-directory: ${{ env.TF_WORKING_DIR }}

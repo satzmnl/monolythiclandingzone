@@ -1,6 +1,6 @@
 rgs = {
   rg1 = {
-    name     = "rg-chor-dev"
+    name     = "rg-preprod"
     location = "centralindia"
   }
 }
