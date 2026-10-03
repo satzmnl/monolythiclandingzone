@@ -8,7 +8,7 @@ terraform {
   }
 
   backend "azurerm" {
-    resource_group_name  = "rg-prepod"
+    resource_group_name  = "SATTAR-RESOURCE-GROUP"
     storage_account_name = "sattarstorage1"
     container_name       = "sattarcontainer"
     key                  = "preprod.terraform.tfstate"

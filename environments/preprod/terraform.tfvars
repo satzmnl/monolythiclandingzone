@@ -1,11 +1,11 @@
 rgs = {
   rg1 = {
-    name     = "rg-preprod"
-    location = "centralindia"
+    name     = "SATTAR-RESOURCE-GROUP"
+    location = "Australia East"
   }
 
   rg2 = {
-    name     = "rg-prod"
-    location = "centralindia"
+    name     = "SATTAR-RESOURCE-GROUP2"
+    location = "West US"
   }
 }
